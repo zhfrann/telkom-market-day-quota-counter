@@ -24,29 +24,136 @@
             { name: 'Kuota D', value: 10, max: 50 },
         ];
 
+        let editingNameIndex = null;
+        let editingValueIndex = null;
+
         function renderCards() {
             const container = document.getElementById('cards');
             container.innerHTML = '';
+
             quotas.forEach((quota, idx) => {
                 const percent = Math.round((quota.value / quota.max) * 100);
+
+                // ---- JUDUL ----
+                const titleElement =
+                    editingNameIndex === idx
+                        ? `
+                        <input 
+                            id="edit-title-${idx}"
+                            type="text" 
+                            value="${quota.name}" 
+                            class="px-2 py-1 border rounded w-40"
+                            onblur="finishEditName(${idx})"
+                            onkeydown="if(event.key === 'Enter'){ finishEditName(${idx}); }"
+                            autofocus
+                        >
+                      `
+                        : `
+                        <span 
+                            class='text-lg font-semibold text-[#6B4F2A] cursor-pointer'
+                            onclick='startEditName(${idx})'
+                        >
+                            ${quota.name}
+                        </span>
+                      `;
+
+                // ---- STOK ----
+                const stockElement =
+                    editingValueIndex === idx
+                        ? `
+                        <input 
+                            id="edit-stock-${idx}"
+                            type="number" 
+                            value="${quota.value}" 
+                            class="px-2 py-1 border rounded w-20 text-right"
+                            min="0" max="${quota.max}"
+                            onblur="finishEditStock(${idx})"
+                            onkeydown="if(event.key === 'Enter'){ finishEditStock(${idx}); }"
+                            autofocus
+                        >
+                      `
+                        : `
+                        <span 
+                            class='text-xl font-bold text-[#A67C52] cursor-pointer'
+                            onclick='startEditStock(${idx})'
+                        >
+                            Stok: ${quota.value}
+                        </span>
+                      `;
+
                 container.innerHTML += `
-          <div class='rounded-xl shadow-lg p-6 w-96 mx-auto flex flex-col justify-between' style='background-color: #FFFFFF; border: 2px solid #A67C52;'>
-            <div class='flex justify-between items-center mb-2'>
-              <span class='text-lg font-semibold text-[#6B4F2A]'>${quota.name}</span>
-              <span class='text-xl font-bold text-[#A67C52]'>Stok: ${quota.value}</span>
-            </div>
-            <div class='w-full h-4 rounded-full bg-[#F7C6C7] overflow-hidden mb-4 border border-[#A67C52]'>
-              <div style='width: ${percent}%; background: linear-gradient(90deg, #A67C52 0%, #F7C6C7 100%);' class='h-full transition-all'></div>
-            </div>
-            <div class='flex justify-between'>
-              <button onclick='changeQuota(${idx}, -1)' class='px-4 py-2 rounded font-semibold text-white' style='background-color: #A67C52;'>Kurang</button>
-              <button onclick='changeQuota(${idx}, 1)' class='px-4 py-2 rounded font-semibold text-[#6B4F2A]' style='background-color: #F7C6C7;'>Tambah</button>
-            </div>
-          </div>
-        `;
+                <div class='rounded-xl shadow-lg p-6 w-96 mx-auto flex flex-col justify-between'
+                    style='background-color: #FFFFFF; border: 2px solid #A67C52;'>
+
+                    <div class='flex justify-between items-center mb-2'>
+                        ${titleElement}
+                        ${stockElement}
+                    </div>
+
+                    <div class='w-full h-4 rounded-full bg-[#F7C6C7] overflow-hidden mb-4 border border-[#A67C52]'>
+                        <div style='width: ${percent}%; background: linear-gradient(90deg, #A67C52 0%, #F7C6C7 100%);' 
+                             class='h-full transition-all'></div>
+                    </div>
+
+                    <div class='flex justify-between'>
+                        <button onclick='changeQuota(${idx}, -1)' 
+                                class='px-4 py-2 rounded font-semibold text-white' 
+                                style='background-color: #A67C52;'>Kurang</button>
+                                
+                        <button onclick='changeQuota(${idx}, 1)' 
+                                class='px-4 py-2 rounded font-semibold text-[#6B4F2A]' 
+                                style='background-color: #F7C6C7;'>Tambah</button>
+                    </div>
+                </div>
+            `;
             });
         }
 
+        // --------- EDIT JUDUL ----------
+        function startEditName(idx) {
+            editingNameIndex = idx;
+            renderCards();
+            setTimeout(() => {
+                document.getElementById(`edit-title-${idx}`).focus();
+            }, 10);
+        }
+
+        function finishEditName(idx) {
+            const input = document.getElementById(`edit-title-${idx}`);
+            if (!input) return;
+
+            const newName = input.value.trim();
+            if (newName.length > 0) quotas[idx].name = newName;
+
+            editingNameIndex = null;
+            renderCards();
+        }
+
+        // --------- EDIT STOK ----------
+        function startEditStock(idx) {
+            editingValueIndex = idx;
+            renderCards();
+            setTimeout(() => {
+                document.getElementById(`edit-stock-${idx}`).focus();
+            }, 10);
+        }
+
+        function finishEditStock(idx) {
+            const input = document.getElementById(`edit-stock-${idx}`);
+            if (!input) return;
+
+            let newVal = parseInt(input.value);
+
+            if (isNaN(newVal)) newVal = quotas[idx].value;
+
+            newVal = Math.max(0, Math.min(quotas[idx].max, newVal));
+            quotas[idx].value = newVal;
+
+            editingValueIndex = null;
+            renderCards();
+        }
+
+        // ---------- EDIT VIA BUTTON ----------
         function changeQuota(idx, delta) {
             quotas[idx].value = Math.max(0, Math.min(quotas[idx].max, quotas[idx].value + delta));
             renderCards();
@@ -54,6 +161,8 @@
 
         renderCards();
     </script>
+
+
 </body>
 
 </html>
