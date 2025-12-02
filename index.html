@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuota Progress Bar</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="min-h-screen flex items-center justify-center" style="background-color: #FFF9E5;">
+    <div class="space-y-8">
+        <!-- Kuota Card Template -->
+        <div id="cards" class="flex flex-wrap gap-8">
+            <!-- Cards will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        const quotas = [
+            { name: 'Kuota A', value: 7, max: 50 },
+            { name: 'Kuota B', value: 10, max: 50 },
+            { name: 'Kuota C', value: 10, max: 50 },
+            { name: 'Kuota D', value: 10, max: 50 },
+        ];
+
+        function renderCards() {
+            const container = document.getElementById('cards');
+            container.innerHTML = '';
+            quotas.forEach((quota, idx) => {
+                const percent = Math.round((quota.value / quota.max) * 100);
+                container.innerHTML += `
+          <div class='rounded-xl shadow-lg p-6 w-96 mx-auto flex flex-col justify-between' style='background-color: #FFFFFF; border: 2px solid #A67C52;'>
+            <div class='flex justify-between items-center mb-2'>
+              <span class='text-lg font-semibold text-[#6B4F2A]'>${quota.name}</span>
+              <span class='text-xl font-bold text-[#A67C52]'>Stok: ${quota.value}</span>
+            </div>
+            <div class='w-full h-4 rounded-full bg-[#F7C6C7] overflow-hidden mb-4 border border-[#A67C52]'>
+              <div style='width: ${percent}%; background: linear-gradient(90deg, #A67C52 0%, #F7C6C7 100%);' class='h-full transition-all'></div>
+            </div>
+            <div class='flex justify-between'>
+              <button onclick='changeQuota(${idx}, -1)' class='px-4 py-2 rounded font-semibold text-white' style='background-color: #A67C52;'>Kurang</button>
+              <button onclick='changeQuota(${idx}, 1)' class='px-4 py-2 rounded font-semibold text-[#6B4F2A]' style='background-color: #F7C6C7;'>Tambah</button>
+            </div>
+          </div>
+        `;
+            });
+        }
+
+        function changeQuota(idx, delta) {
+            quotas[idx].value = Math.max(0, Math.min(quotas[idx].max, quotas[idx].value + delta));
+            renderCards();
+        }
+
+        renderCards();
+    </script>
+</body>
+
+</html>
